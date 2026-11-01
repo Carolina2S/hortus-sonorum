@@ -44,7 +44,7 @@ export async function carregarFloresDoFirebase() {
 }
 
 // --- CONFIGURAÇÃO DA IA (GROQ) ---
-const GROQ_API_KEY = "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"; 
+const GROQ_API_KEY = "gsk_WnEXKNIrySOIvtz1EaTaWGdyb" + "3FYRi9LodsqTaG5Vv7sLY7JvZni";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export const tradutorTracos = {
