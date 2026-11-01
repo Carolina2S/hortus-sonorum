@@ -12,6 +12,12 @@
 </head>
 <body>
 
+  <!-- AVISO PARA TELEMÓVEL: só aparece em ecrãs pequenos / tácteis -->
+  <div id="aviso-mobile" role="alert">
+    <h1 class="aviso-titulo">Hortus Sonorum</h1>
+    <p class="aviso-frase">Esta experiência foi pensada para desktop. Abre-a num computador para plantares a tua flor.</p>
+  </div>
+
   <section id="garden">
     <!-- Onde as flores e o fundo vão ser desenhados -->
     <canvas id="stage"></canvas>
@@ -139,6 +145,15 @@
     </div>
   </div>
 
-  <script type="module" src="ui.js"></script>
+  <script>
+    // Em telemóvel/ecrã pequeno não carregamos o jardim (poupa a música de 12 MB, a câmara e o Firebase)
+    const ecraMobile = window.matchMedia('(max-width: 820px), (hover: none) and (pointer: coarse) and (max-width: 1100px)');
+    if (!ecraMobile.matches) {
+      import('./ui.js');
+    } else {
+      // Se a janela for aumentada para desktop, recarrega para arrancar o jardim
+      ecraMobile.addEventListener('change', (e) => { if (!e.matches) location.reload(); });
+    }
+  </script>
 </body>
 </html>
