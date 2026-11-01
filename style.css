@@ -1,0 +1,522 @@
+/* Variáveis base (a vossa paleta) */
+:root {
+  --bg-intro: #3b2350; /* Fundo da intro */
+  --bg-garden: #bfe9ff; /* Céu do jardim */
+  --text-light: #fff6dc;
+  --text-dark: #3b2350;
+  --accent-color: #ffd23f;
+}
+
+/* Reset básico para não haver margens estranhas */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Impede scroll, fica tipo app */
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Título no Centro (Estado Inicial) */
+#main-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Garante que fica perfeitamente centrado */
+  font-family: 'Playfair Display', serif;
+  color: #3C4921;
+  font-size: 5rem;
+  margin: 0;
+  z-index: 10;
+  /* A magia acontece aqui: uma transição suave de 1.5 segundos para qualquer mudança */
+  transition: all 1.5s ease-in-out;
+  text-align: center;
+  pointer-events: none; /* Para não bloquear cliques */
+}
+
+/* Título no Canto (Estado Final Responsivo) */
+#main-title.corner {
+  /* Usar percentagens afasta o título das bordas de forma proporcional ao tamanho do ecrã */
+  top: 3.5rem; 
+  left: 3.5rem; 
+  transform: translate(0, 0);
+  
+  /* O clamp() garante que a fonte encolhe em telemóveis mas não passa de um limite máximo */
+  font-size: clamp(1.5rem, 4vw, 2.5rem); 
+}
+
+.logo-title {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  /* Uma animação CSS super simples a pulsar como placeholder */
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Classe para esconder a intro suavemente */
+#intro.fade-out {
+  opacity: 0;
+  transform: scale(1.1);
+  pointer-events: none; /* Para não apanhar cliques enquanto desaparece */
+}
+
+/* --- Secção do Jardim --- */
+#garden {
+  position: absolute;
+  inset: 0;
+  
+  /* Mantém a cor como plano B caso a imagem demore a carregar */
+  background-color: var(--bg-garden); 
+  
+  /* Adiciona a tua imagem aqui (muda o nome do ficheiro) */
+  background-image: url('data/fundo.png'); 
+  background-size: cover; /* Faz com que a imagem cubra o ecrã todo sem distorcer */
+  background-position: center; /* Mantém a imagem centrada */
+  background-repeat: no-repeat;
+  
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
+}
+
+#playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 1);
+  z-index: 5;
+  pointer-events: none; /* Para podermos clicar nas coisas através da linha */
+  display: none; /* Fica escondida quando a música está em pausa */
+}
+
+/* Canvas ocupa o ecrã todo por trás da UI */
+#stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#ui-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none; /* Deixa passar cliques para o canvas... */
+  padding: 2rem;
+}
+
+/* --- BOTÕES ORGÂNICOS E ELEGANTES --- */
+#btn-plantar, #btn-confirm-flower {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #3C4921; /* Verde escuro do título */
+  background-color: rgba(255, 255, 255, 0.4); /* Fundo quase transparente */
+  border: 1px solid #3C4921;
+  border-radius: 40px;
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(4px); /* Cria um leve efeito de vidro fosco no fundo */
+}
+
+/* Efeito ao passar o rato (Hover) */
+#btn-plantar:hover, #btn-confirm-flower:hover {
+  background-color: #3C4921;
+  color: #fff6dc; /* A cor clara da vossa paleta original */
+  box-shadow: 0 4px 15px rgba(60, 73, 33, 0.3);
+}
+
+#btn-plantar {
+  position: absolute;
+  top: 3.5rem;
+  right: 3.5rem;
+}
+
+#btn-confirm-flower:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: transparent;
+  color: #3C4921;
+}
+
+
+/* --- POP-UP LEVE E POÉTICO --- */
+#analysis-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  /* Fundo claro, quente e translúcido para não tapar o jardim a 100% */
+  background-color: rgba(252, 248, 232, 0.95); 
+  color: #3C4921;
+  padding: 3rem 2.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 73, 33, 0.2);
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 420px;
+  backdrop-filter: blur(8px);
+}
+
+#analysis-popup.hidden {
+  display: none;
+}
+
+#popup-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Caixa da mensagem que a pessoa deixa com a flor */
+#mensagem-flor {
+  display: block;
+  width: 100%;
+  margin: 1.2rem 0 1.5rem;
+  padding: 0.8rem 1rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-style: italic;
+  color: #3C4921;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(60, 73, 33, 0.3);
+  border-radius: 12px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+#mensagem-flor:focus {
+  border-color: #3C4921;
+}
+
+#mensagem-flor.hidden {
+  display: none;
+}
+
+/* Lista de traços mais delicada */
+.trait-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px dashed rgba(60, 73, 33, 0.2); /* Linha tracejada subtil em vez de sólida */
+  padding-bottom: 0.4rem;
+  font-size: 1rem;
+  font-family: system-ui, -apple-system, sans-serif; /* Mantemos as informações fáceis de ler */
+}
+
+.trait-item strong {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* --- CONTROLOS DE ÁUDIO NO CANTO INFERIOR DIREITO --- */
+#audio-controls {
+  position: absolute;
+  bottom: 3.5rem;
+  right: 3.5rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 10;
+  pointer-events: auto; /* Permite clicar nos botões */
+}
+
+/* Estilo base dos botões circulares de stroke */
+.circle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #3C4921;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  color: #3C4921;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+/* Ícones SVG dentro dos botões (apenas stroke) */
+.circle-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+
+/* Efeito Hover */
+.circle-btn:hover {
+  background-color: #3C4921;
+  color: #fff6dc;
+  transform: scale(1.05);
+}
+
+/* Estado ativo/inativo para o botão de loop */
+.circle-btn.inactive {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+/* --- POP-UP DA VITRINE --- */
+#vitrine-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(60, 73, 33, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#vitrine-popup.hidden {
+  display: none;
+}
+
+.vitrine-content {
+  max-height: 94vh;
+  overflow-y: auto;
+  background-color: #fcf8e8;
+  color: #3C4921;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  position: relative;
+  max-width: 750px;
+  width: 90%;
+}
+
+.vitrine-content::after {
+  content: "";
+  position: absolute;
+  inset: 10px;                      /* distância à ponta do pop-up */
+  border: 3px solid #3C4921;
+  border-radius: 8px;
+  pointer-events: none;             /* não bloqueia cliques */
+}
+
+#btn-fechar-vitrine {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.vitrine-container {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Palco da flor com a vitrine por cima (vertical, acompanha o recorte da vitrine) */
+.vitrine-stage {
+  position: relative;
+  height: min(62vh, 520px);
+  aspect-ratio: 771 / 1400;
+  flex-shrink: 0;
+}
+
+#vitrine-canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.vitrine-overlay-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 1;
+  pointer-events: none; /* Deixa passar eventos se necessário */
+}
+
+.vitrine-info {
+  flex: 1;
+  min-width: 250px;
+  text-align: left;
+}
+
+.vitrine-info h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  margin-bottom: 1.2rem;
+}
+
+/* --- BOTÃO DE INFORMAÇÃO (canto inferior esquerdo) + DICAS --- */
+#info-controls {
+  position: absolute;
+  bottom: 3.5rem;
+  left: 3.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 10;
+  pointer-events: none;   /* só o botão recebe cliques */
+}
+
+#btn-info {
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+#btn-info.chamar-atencao {
+  animation: pulso-info 1.6s ease-out infinite;
+}
+
+@keyframes pulso-info {
+  0%   { box-shadow: 0 0 0 0 rgba(60, 73, 33, 0.45); }
+  100% { box-shadow: 0 0 0 16px rgba(60, 73, 33, 0); }
+}
+
+#info-hint {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: #3C4921;
+  background-color: rgba(252, 248, 232, 0.92);
+  border: 1px solid rgba(60, 73, 33, 0.3);
+  border-radius: 20px;
+  padding: 0.6rem 1.1rem;
+  max-width: 260px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+#info-hint.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* --- POP-UP DE INFORMAÇÃO --- */
+#info-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(60, 73, 33, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#info-popup.hidden {
+  display: none;
+}
+
+/* Este elemento é o que faz scroll */
+.info-content {
+  position: relative;
+  max-height: 94vh;
+  overflow-y: auto;
+  background-color: #fcf8e8;
+  color: #3C4921;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  max-width: 680px;
+  width: 90%;
+  text-align: left;
+  line-height: 1.5;
+
+  /* Scroll na cor da moldura */
+  scrollbar-width: thin;
+  scrollbar-color: #3C4921 #fcf8e8;
+}
+
+.info-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.info-content::-webkit-scrollbar-track {
+  background: #fcf8e8;
+}
+
+.info-content::-webkit-scrollbar-thumb {
+  background-color: #3C4921;
+  border-radius: 10px;
+  border: 2px solid #fcf8e8;
+}
+
+/* O conteúdo todo vive aqui dentro, por isso a moldura acompanha a altura total (incluindo o scroll) */
+.info-inner {
+  position: relative;
+  padding: 3rem;
+}
+
+.info-inner::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 3px solid #3C4921;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+#btn-fechar-info {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  z-index: 1;
+}
+
+.info-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  padding-right: 3rem;
+}
+
+.info-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  margin: 1.6rem 0 0.6rem;
+}
+
+.info-content ul {
+  padding-left: 1.2rem;
+}
+
+.info-content li {
+  margin-bottom: 0.5rem;
+}
+
+.info-creditos {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(60, 73, 33, 0.3);
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}

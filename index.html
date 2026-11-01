@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Hortus Sonorum</title>
+  
+  <!-- Importar a fonte Playfair Display -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <section id="garden">
+    <!-- Onde as flores e o fundo vão ser desenhados -->
+    <canvas id="stage"></canvas>
+         
+    <!-- UI do Jardim -->
+    <div id="ui-layer">
+      <h1 id="main-title">Hortus Sonorum</h1>
+      
+      <div id="playhead"></div>
+      
+      <button id="btn-plantar">Plantar uma flor</button>
+
+      <!-- NOVOS BOTÕES CIRCULARES NO CANTO INFERIOR DIREITO -->
+      <div id="audio-controls">
+        <!-- Botão Play/Pause -->
+        <button id="btn-play-pause" class="circle-btn" title="Play/Pause">
+          <svg id="icon-play-pause" viewBox="0 0 24 24">
+            <!-- Ícone inicial de Pause (já que arranca a tocar) -->
+            <line x1="10" y1="6" x2="10" y2="18"></line>
+            <line x1="14" y1="6" x2="14" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Botão Reiniciar -->
+        <button id="btn-restart" class="circle-btn" title="Reiniciar Linha">
+          <svg viewBox="0 0 24 24">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+        </button>
+
+        <!-- Botão Loop / Repetição Única -->
+        <button id="btn-loop" class="circle-btn active" title="Alternar Loop">
+          <svg viewBox="0 0 24 24">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- BOTÃO DE INFORMAÇÃO NO CANTO INFERIOR ESQUERDO -->
+      <div id="info-controls">
+        <button id="btn-info" class="circle-btn" title="Sobre o projeto" aria-label="Sobre o projeto">
+          <svg viewBox="0 0 24 24">
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="12" y1="7" x2="12" y2="7.01"></line>
+          </svg>
+        </button>
+        <div id="info-hint" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- Elementos escondidos para capturar a imagem -->
+    <video id="camera-stream" autoplay playsinline hidden></video>
+    <canvas id="capture-canvas" hidden></canvas>
+
+    <!-- Pop-up de Análise -->
+    <div id="analysis-popup" class="hidden">
+      <div class="popup-content">
+        <h2 id="popup-title">A sentir o ambiente...</h2>
+        <div id="traits-list"></div>
+        <textarea id="mensagem-flor" class="hidden" maxlength="140" rows="3" placeholder="Deixa uma mensagem ao jardim (opcional)"></textarea>
+        <button id="btn-confirm-flower" class="hidden">Semear esta flor</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- POP-UP DA VITRINE / EXPOSIÇÃO DA FLOR -->
+    <div id="vitrine-popup" class="hidden">
+      <div class="vitrine-content">
+        <button id="btn-fechar-vitrine" class="circle-btn" title="Fechar">×</button>
+        <div class="vitrine-container">
+          <!-- Lado Esquerdo: A flor na vitrine -->
+          <div class="vitrine-stage">
+            <canvas id="vitrine-canvas" width="771" height="1400"></canvas>
+            <img src="data/vitrine_recortada.png" alt="Vitrine" class="vitrine-overlay-img">
+          </div>
+          <!-- Lado Direito: Características da pessoa -->
+          <div class="vitrine-info">
+            <h2>Memória Revelada</h2>
+            <div id="vitrine-traits-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- POP-UP DE INFORMAÇÃO SOBRE O PROJETO -->
+  <div id="info-popup" class="hidden" role="dialog" aria-modal="true" aria-labelledby="info-titulo">
+    <div class="info-content">
+     <div class="info-inner">
+      <button id="btn-fechar-info" class="circle-btn" title="Fechar">×</button>
+
+      <h2 id="info-titulo">Sobre o Hortus Sonorum</h2>
+      <p class="info-intro">
+        O Hortus Sonorum é um jardim sonoro e partilhado. Cada pessoa que passa por aqui
+        transforma-se numa flor, a partir do seu aspeto, e cada flor tem um som associado.
+        Juntas formam uma partitura viva: uma linha percorre o jardim e, quando chega a uma flor,
+        toca o seu acorde.
+      </p>
+
+      <h3>Como nasce uma flor</h3>
+      <p>Uma IA olha para ti através da câmara e reconhece algumas características visíveis. Cada uma decide uma parte da flor:</p>
+      <ul>
+        <li><strong>Tipo de cabelo</strong> define a forma das pétalas: liso, em ponta; ondulado ou sem cabelo, redondas; encaracolado ou crespo, em caracol.</li>
+        <li><strong>Comprimento do cabelo</strong> define o tamanho das pétalas: quanto mais comprido, maiores.</li>
+        <li><strong>Faixa etária</strong> define o número de pétalas: criança 5, adolescente 6, jovem adulto 5, adulto 8 e sénior 9.</li>
+        <li><strong>Óculos e barba</strong> aparecem no caule da flor.</li>
+        <li><strong>Cor predominante</strong> (da roupa e do fundo) dá a cor das pétalas e escolhe o acorde: vermelho toca Dó, amarelo Fá, azul Lá, laranja Sol e roxo Mi.</li>
+        <li>O lugar onde a flor nasce no jardim é escolhido ao acaso.</li>
+      </ul>
+
+      <h3>Como interagir</h3>
+      <ul>
+        <li><strong>Plantar uma flor:</strong> carrega em "Plantar uma flor", olha para a câmara, deixa uma mensagem se quiseres e semeia.</li>
+        <li><strong>Ouvir o jardim:</strong> a linha branca atravessa o ecrã e toca o acorde de cada flor por onde passa.</li>
+        <li><strong>Bater palmas:</strong> se baterem palmas quando a linha passa por uma flor, abre-se a sua vitrine com as características e a mensagem que deixou.</li>
+        <li><strong>Controlar a música:</strong> no canto inferior direito podes pausar, reiniciar a linha e escolher entre repetir sempre ou tocar só uma vez.</li>
+        <li><strong>Mudar as flores de sítio:</strong> com o jardim em pausa, arrasta as flores com o rato.</li>
+      </ul>
+
+      <p class="info-creditos">Criado por <strong>Carolina Seixas</strong> e <strong>José Pereira</strong></p>
+     </div>
+    </div>
+  </div>
+
+  <script type="module" src="ui.js"></script>
+</body>
+</html>
