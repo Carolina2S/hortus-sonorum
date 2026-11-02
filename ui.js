@@ -169,7 +169,10 @@ function tocarAcordeDaFlor(cor) {
 }
 
 // --- TRANSIÇÃO INICIAL ---
-window.addEventListener('load', () => {
+// IMPORTANTE: o ui.js é carregado com import() dinâmico (ver index.html), por isso o evento
+// 'load' pode já ter acontecido quando este código corre. Se só ouvíssemos o 'load', a animação
+// do título (e o desenho do jardim) falhava de vez em quando. Por isso verificamos o readyState.
+function arrancarIntro() {
   const mainTitle = document.getElementById('main-title');
   setTimeout(() => {
     if (mainTitle) {
@@ -180,7 +183,13 @@ window.addEventListener('load', () => {
       console.log("Jardim pronto e flores desenhadas!");
     }, 1500);
   }, 2000);
-});
+}
+
+if (document.readyState === 'complete') {
+  arrancarIntro();   // a página já carregou: arranca já
+} else {
+  window.addEventListener('load', arrancarIntro, { once: true });
+}
 
 // --- FLUXO DA CÂMARA E IA ---
 btnPlantar.addEventListener('click', async () => {
